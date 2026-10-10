@@ -1,0 +1,6 @@
+build/
+data/*
+!data/.gitkeep
+.cache/
+compile_commands.json
+.DS_Store
