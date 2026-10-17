@@ -36,4 +36,15 @@ inline uint64_t read_be48(const void* p) noexcept {
   return v;
 }
 
+inline void write_be16(void* p, uint16_t v) noexcept {
+  uint8_t b[2] = {static_cast<uint8_t>(v >> 8), static_cast<uint8_t>(v)};
+  std::memcpy(p, b, 2);
+}
+
+inline void write_be64(void* p, uint64_t v) noexcept {
+  uint8_t b[8];
+  for (int i = 7; i >= 0; --i) { b[i] = static_cast<uint8_t>(v); v >>= 8; }
+  std::memcpy(p, b, 8);
+}
+
 }  // namespace itch
