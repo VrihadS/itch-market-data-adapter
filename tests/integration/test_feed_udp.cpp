@@ -95,7 +95,7 @@ static int run(const Scenario &sc, unsigned port_base, uint64_t seed, bool verbo
   return 0;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **) {
   spdlog::set_level(spdlog::level::off);
   const unsigned base = 42000 + (unsigned)(::getpid() % 1500) * 16;
   const bool verbose = argc > 1;

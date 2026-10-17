@@ -324,7 +324,7 @@ public:
     virtual void OnRetailInterest           (const NasdaqItch::RetailInterest&)           {}  // ADDED
     virtual void OnDirectListingWithCapitalRaise(
                                                 const NasdaqItch::DirectListingWithCapitalRaise&) {}  // ADDED
-    virtual void OnUnknown(char type, const char* data, size_t len)                       {}
+    virtual void OnUnknown(char /*type*/, const char* /*data*/, size_t /*len*/)           {}
 };
 
 class NasdaqItchDecoder

@@ -54,12 +54,12 @@ The sink sees every message of the session exactly once, in sequence order, or t
 
 ```
 # the transmitter stand-in: replay a real ITCH file as MoldUDP64 on two lines, with faults, and serve re-requests
-gzip -dc data/12302019.NASDAQ_ITCH50.gz | build/itch_mold_sender \
+gzip -dc data/12302019.NASDAQ_ITCH50.gz | build/release/itch_mold_sender \
     --a 127.0.0.1:30011 --b 127.0.0.1:30012 --rerequest-port 40500 --rate 300000 --max-messages 3000000 \
     --loss 0.05 --dup 0.02 --reorder 0.1:3 --burst 0.002:15 --delay-b 2 --corrupt 0.01
 
 # the adapter (start it first, or later to see a mid-day join); --serve publishes the books over Aeron
-build/itch_feed_handler --a 127.0.0.1:30011 --b 127.0.0.1:30012 --rerequest 127.0.0.1:40500 --digest [--serve]
+build/release/itch_feed_handler --a 127.0.0.1:30011 --b 127.0.0.1:30012 --rerequest 127.0.0.1:40500 --digest [--serve]
 ```
 
 For multicast use group addresses and `--iface <local ip>` on both. `itch_book_replay -n N --digest` prints the

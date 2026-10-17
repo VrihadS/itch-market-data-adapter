@@ -1,0 +1,71 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": { "major": 3, "minor": 21, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "release",
+      "displayName": "Release (-O3)",
+      "binaryDir": "${sourceDir}/build/release",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+    },
+    {
+      "name": "release-native",
+      "displayName": "Fastest on this machine: Release + -march=native + LTO (binaries are not portable)",
+      "inherits": "release",
+      "binaryDir": "${sourceDir}/build/release-native",
+      "cacheVariables": { "ITCH_NATIVE": "ON", "ITCH_LTO": "ON" }
+    },
+    {
+      "name": "profile",
+      "displayName": "release-native with symbols and frame pointers for perf / Instruments",
+      "inherits": "release-native",
+      "binaryDir": "${sourceDir}/build/profile",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "CMAKE_CXX_FLAGS": "-fno-omit-frame-pointer"
+      }
+    },
+    {
+      "name": "debug",
+      "displayName": "Debug",
+      "binaryDir": "${sourceDir}/build/debug",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }
+    },
+    {
+      "name": "asan",
+      "displayName": "AddressSanitizer + UndefinedBehaviorSanitizer",
+      "binaryDir": "${sourceDir}/build/asan",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "RelWithDebInfo", "ITCH_SANITIZE": "ON" }
+    },
+    {
+      "name": "tsan",
+      "displayName": "ThreadSanitizer (no Aeron)",
+      "binaryDir": "${sourceDir}/build/tsan",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "RelWithDebInfo", "ITCH_TSAN": "ON", "ITCH_WITH_AERON": "OFF" }
+    },
+    {
+      "name": "no-aeron",
+      "displayName": "Release without Aeron (faster to build; no market data server/client/gateway)",
+      "inherits": "release",
+      "binaryDir": "${sourceDir}/build/no-aeron",
+      "cacheVariables": { "ITCH_WITH_AERON": "OFF" }
+    }
+  ],
+  "buildPresets": [
+    { "name": "release", "configurePreset": "release" },
+    { "name": "release-native", "configurePreset": "release-native" },
+    { "name": "profile", "configurePreset": "profile" },
+    { "name": "debug", "configurePreset": "debug" },
+    { "name": "asan", "configurePreset": "asan" },
+    { "name": "tsan", "configurePreset": "tsan" },
+    { "name": "no-aeron", "configurePreset": "no-aeron" }
+  ],
+  "testPresets": [
+    { "name": "release", "configurePreset": "release", "output": { "outputOnFailure": true } },
+    { "name": "release-native", "configurePreset": "release-native", "output": { "outputOnFailure": true } },
+    { "name": "debug", "configurePreset": "debug", "output": { "outputOnFailure": true } },
+    { "name": "asan", "configurePreset": "asan", "output": { "outputOnFailure": true } },
+    { "name": "tsan", "configurePreset": "tsan", "output": { "outputOnFailure": true } },
+    { "name": "no-aeron", "configurePreset": "no-aeron", "output": { "outputOnFailure": true } }
+  ]
+}

@@ -77,20 +77,20 @@ For instruments nobody subscribed to, the book costs one byte lookup per message
 
 ```
 # server: replay the day to 10:00 ET at full speed, then 200k msgs/s; serves IPC and UDP port 40100
-gzip -dc data/12302019.NASDAQ_ITCH50.gz | build/itch_md_server --preload-until 10:00:00 --rate 200000
+gzip -dc data/12302019.NASDAQ_ITCH50.gz | build/release/itch_md_server --preload-until 10:00:00 --rate 200000
 
 # client on the same machine: IPC
-build/itch_md_client --symbols AAPL,MSFT --l2 10 --tns
+build/release/itch_md_client --symbols AAPL,MSFT --l2 10 --tns
 
 # client on another machine: UDP unicast (reply-host = its own address as the server sees it)
-build/itch_md_client --server 10.0.0.1 --reply-host 10.0.0.7 --symbols AAPL --l2 5
+build/release/itch_md_client --server 10.0.0.1 --reply-host 10.0.0.7 --symbols AAPL --l2 5
 
 # multicast
-build/itch_md_client --server 10.0.0.1 --reply-host 10.0.0.7 --mcast 239.1.1.1 --symbols AAPL --tns
+build/release/itch_md_client --server 10.0.0.1 --reply-host 10.0.0.7 --mcast 239.1.1.1 --symbols AAPL --tns
 ```
 
 Without `--aeron-dir` the server starts an **embedded** media driver in Aeron's default directory. For
-anything real, run the standalone `aeronmd` (`cmake --build build --target aeronmd`, produced at `build/_deps/aeron-build/binaries/aeronmd`)
+anything real, run the standalone `aeronmd` (`cmake --build --preset release --target aeronmd`, produced at `build/release/_deps/aeron-build/binaries/aeronmd`)
 on its own isolated, pinned cores and pass its directory with `--aeron-dir`.
 
 Build options: `-DITCH_WITH_AERON=OFF` builds everything except the Aeron transport (the in-process
@@ -108,8 +108,8 @@ subscriptions, snapshots, sequence numbers and the L2/trade semantics are identi
 
 ```
 # on the server machine: the server, then the gateway (IPC to the server on the same machine)
-gzip -dc data/12302019.NASDAQ_ITCH50.gz | build/itch_md_server --preload-until 10:00:00 --rate 100000 &
-build/itch_md_gateway --listen 0.0.0.0 --port 40300 --allow 192.168.1.0/24
+gzip -dc data/12302019.NASDAQ_ITCH50.gz | build/release/itch_md_server --preload-until 10:00:00 --rate 100000 &
+build/release/itch_md_gateway --listen 0.0.0.0 --port 40300 --allow 192.168.1.0/24
 
 # on the Windows machine
 py itch_md_client.py --host <server ip> --port 40300 --symbols AAPL,MSFT --l2 5 --tns
@@ -143,19 +143,19 @@ different stream ids on the same group do not share and receive only their own d
 **Manual, one machine, several terminals.** Start the server (this replays the day to 10:00 ET at full
 speed, then 100k msgs/s; `--mcast-interface 127.0.0.1` lets multicast work over loopback):
 
-    gzip -dc data/12302019.NASDAQ_ITCH50.gz | build/itch_md_server --preload-until 10:00:00 \
+    gzip -dc data/12302019.NASDAQ_ITCH50.gz | build/release/itch_md_server --preload-until 10:00:00 \
         --rate 100000 --stop-at 10:30:00 --mcast-interface 127.0.0.1
 
 Then, each in its own terminal:
 
     # IPC (same machine)
-    build/itch_md_client --symbols AAPL,MSFT --l2 5 --tns
+    build/release/itch_md_client --symbols AAPL,MSFT --l2 5 --tns
     # UDP unicast, over loopback standing in for another machine
-    build/itch_md_client --server 127.0.0.1 --reply-host 127.0.0.1 --reply-port 40555 --symbols AAPL --l2 10
+    build/release/itch_md_client --server 127.0.0.1 --reply-host 127.0.0.1 --reply-port 40555 --symbols AAPL --l2 10
     # multicast: run these two together; same group, port and stream => one shared publication
-    build/itch_md_client --server 127.0.0.1 --reply-host 127.0.0.1 --reply-port 40556 --reply-stream 777 \
+    build/release/itch_md_client --server 127.0.0.1 --reply-host 127.0.0.1 --reply-port 40556 --reply-stream 777 \
         --mcast 239.30.10.77 --symbols AAPL --tns
-    build/itch_md_client --server 127.0.0.1 --reply-host 127.0.0.1 --reply-port 40556 --reply-stream 777 \
+    build/release/itch_md_client --server 127.0.0.1 --reply-host 127.0.0.1 --reply-port 40556 --reply-stream 777 \
         --mcast 239.30.10.77 --symbols MSFT --l2 3 --tns
 
 What to look for: `ack ... ok` with the right locate per symbol, an L2 `SNAPSHOT` first, `gaps 0` in the
