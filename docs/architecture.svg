@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" width="1200" height="700" font-family="'Bradley Hand','Segoe Print','Comic Sans MS','Chalkboard SE',cursive">
+  <title>ITCH market data adapter: architecture</title>
+  <defs>
+    <!-- slight wobble so lines look drawn by hand -->
+    <filter id="wob" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="3.2"/>
+    </filter>
+    <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M1 1 L9 5 L1 9" fill="none" stroke="#2b2b2b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="ahr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M1 1 L9 5 L1 9" fill="none" stroke="#c0392b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1" fill="#d9d2c0"/>
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="700" fill="#fbf8ef"/>
+  <rect width="1200" height="700" fill="url(#dots)"/>
+
+  <text x="40" y="52" font-size="34" fill="#2b2b2b" font-weight="bold">From the wire to your strategy</text>
+  <text x="42" y="80" font-size="17" fill="#6b6455">Nasdaq TotalView-ITCH 5.0 over MoldUDP64, replay + loopback tested. Never on a live session (yet!).</text>
+
+  <g filter="url(#wob)" stroke="#2b2b2b" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Nasdaq lines -->
+    <rect x="40" y="150" width="150" height="70" rx="14" fill="#ffe08a"/>
+    <rect x="40" y="260" width="150" height="70" rx="14" fill="#ffe08a"/>
+    <!-- network thread -->
+    <rect x="260" y="125" width="270" height="240" rx="18" fill="#cfe8ff"/>
+    <rect x="280" y="178" width="230" height="52" rx="10" fill="#eef7ff"/>
+    <rect x="280" y="244" width="230" height="96" rx="10" fill="#eef7ff"/>
+    <!-- ring -->
+    <rect x="575" y="205" width="90" height="80" rx="14" fill="#e5d4ff"/>
+    <!-- book thread -->
+    <rect x="710" y="125" width="260" height="240" rx="18" fill="#d5f2d0"/>
+    <rect x="730" y="178" width="220" height="62" rx="10" fill="#f0fbee"/>
+    <rect x="730" y="254" width="220" height="98" rx="10" fill="#f0fbee"/>
+    <!-- aeron server -->
+    <rect x="710" y="440" width="260" height="90" rx="16" fill="#ffd2bd"/>
+    <!-- clients -->
+    <rect x="990" y="395" width="200" height="62" rx="12" fill="#fff"/>
+    <rect x="990" y="475" width="200" height="62" rx="12" fill="#fff"/>
+    <rect x="990" y="555" width="200" height="62" rx="12" fill="#fff"/>
+    <!-- gateway -->
+    <rect x="460" y="560" width="190" height="60" rx="12" fill="#ffd2bd"/>
+    <!-- re-request server -->
+    <rect x="40" y="440" width="190" height="78" rx="14" fill="#ffe08a"/>
+  </g>
+
+  <g filter="url(#wob)" fill="none" stroke="#2b2b2b" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M192 185 C 220 185, 232 195, 258 200" marker-end="url(#ah)"/>
+    <path d="M192 295 C 220 295, 232 290, 258 285" marker-end="url(#ah)"/>
+    <path d="M532 245 L 572 245" marker-end="url(#ah)"/>
+    <path d="M667 245 L 708 245" marker-end="url(#ah)"/>
+    <path d="M840 366 C 840 395, 842 415, 840 438" marker-end="url(#ah)"/>
+    <path d="M972 485 C 980 470, 982 440, 988 428" marker-end="url(#ah)"/>
+    <path d="M972 495 L 988 506" marker-end="url(#ah)"/>
+    <path d="M830 532 C 800 590, 700 590, 652 590" marker-end="url(#ah)"/>
+    <path d="M652 600 C 800 650, 940 640, 988 598" marker-end="url(#ah)"/>
+  </g>
+
+  <!-- gap recovery loop (red) -->
+  <g filter="url(#wob)" fill="none" stroke="#c0392b" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="7 6">
+    <path d="M300 342 C 280 400, 200 420, 150 438" marker-end="url(#ahr)"/>
+    <path d="M232 490 C 330 480, 400 420, 440 368" marker-end="url(#ahr)"/>
+  </g>
+
+  <!-- labels: boxes -->
+  <g fill="#2b2b2b" text-anchor="middle">
+    <text x="115" y="183" font-size="21" font-weight="bold">Line A</text>
+    <text x="115" y="206" font-size="15">multicast</text>
+    <text x="115" y="293" font-size="21" font-weight="bold">Line B</text>
+    <text x="115" y="316" font-size="15">same data, redundant</text>
+
+    <text x="395" y="154" font-size="21" font-weight="bold">Network thread</text>
+    <text x="395" y="201" font-size="17">UDP receive (batch drain)</text>
+    <text x="395" y="220" font-size="14" fill="#6b6455">busy-polls a pinned core</text>
+    <text x="395" y="268" font-size="18" font-weight="bold">FeedSession</text>
+    <text x="395" y="290" font-size="15">sequence numbers</text>
+    <text x="395" y="309" font-size="15">A/B arbitration: first wins</text>
+    <text x="395" y="328" font-size="15">gap recovery, mid-day join</text>
+
+    <text x="620" y="236" font-size="20" font-weight="bold">SPSC</text>
+    <text x="620" y="258" font-size="20" font-weight="bold">ring</text>
+    <text x="620" y="276" font-size="13" fill="#6b6455">no locks</text>
+
+    <text x="840" y="154" font-size="21" font-weight="bold">Book thread</text>
+    <text x="840" y="203" font-size="17" font-weight="bold">ITCH decoder</text>
+    <text x="840" y="225" font-size="14">23 message types</text>
+    <text x="840" y="279" font-size="18" font-weight="bold">BookManager</text>
+    <text x="840" y="301" font-size="15">one book per instrument</text>
+    <text x="840" y="320" font-size="15">pooled orders, FIFO levels</text>
+    <text x="840" y="343" font-size="13" fill="#6b6455">only std::map nodes allocate</text>
+
+    <text x="840" y="475" font-size="21" font-weight="bold">Aeron market data server</text>
+    <text x="840" y="499" font-size="15">subscribe per instrument:</text>
+    <text x="840" y="518" font-size="15">L2 depth ≤ 10 and/or time &amp; sales</text>
+
+    <text x="1090" y="420" font-size="17" font-weight="bold">Strategy, same host</text>
+    <text x="1090" y="441" font-size="14">Aeron IPC</text>
+    <text x="1090" y="500" font-size="17" font-weight="bold">Strategy, other host</text>
+    <text x="1090" y="521" font-size="14">Aeron UDP / multicast</text>
+    <text x="1090" y="580" font-size="17" font-weight="bold">Python / Windows</text>
+    <text x="1090" y="601" font-size="14">plain TCP, stdlib only</text>
+
+    <text x="555" y="587" font-size="19" font-weight="bold">TCP gateway</text>
+    <text x="555" y="608" font-size="14">speaks the same protocol</text>
+
+    <text x="135" y="472" font-size="19" font-weight="bold">Re-request server</text>
+    <text x="135" y="494" font-size="14">MoldUDP64 retransmits</text>
+    <text x="135" y="510" font-size="14">(unicast replies)</text>
+  </g>
+
+  <!-- handwritten notes -->
+  <g font-size="16" fill="#c0392b">
+    <text x="60" y="400" transform="rotate(-6 60 400)">hole in the sequence?</text>
+    <text x="250" y="425" transform="rotate(-9 250 425)">ask for it again</text>
+  </g>
+  <g font-size="15" fill="#5a5a8a">
+    <text x="40" y="128" transform="rotate(-3 40 128)">whichever line is faster wins</text>
+        <text x="578" y="318" transform="rotate(3 578 318)">absorbs bursts</text>
+    <text x="852" y="410" transform="rotate(-2 852 410)">publishes only what</text>
+    <text x="852" y="428" transform="rotate(-2 852 428)">someone asked for</text>
+  </g>
+
+  <!-- sticky note -->
+  <g transform="rotate(-2 280 620)">
+    <rect x="30" y="590" width="280" height="86" fill="#fff59d" stroke="#d4c24a" stroke-width="1.5" filter="url(#wob)"/>
+    <text x="45" y="615" font-size="16" fill="#2b2b2b" font-weight="bold">How I know it's right:</text>
+    <text x="45" y="637" font-size="14" fill="#2b2b2b">feed with loss, dupes and reordering</text>
+    <text x="45" y="656" font-size="14" fill="#2b2b2b">ends with the same books digest as</text>
+    <text x="45" y="673" font-size="14" fill="#2b2b2b">a direct replay of the file.</text>
+  </g>
+
+  <!-- legend -->
+  <text x="1180" y="685" font-size="13" fill="#9a927e" text-anchor="end">solid = data, dashed red = recovery</text>
+</svg>

@@ -9,12 +9,7 @@ L2 depth and time & sales to strategy processes over **Aeron** (or a TCP gateway
 > session**, and the Linux tuning advice in [docs/performance.md](docs/performance.md) has not been run on Linux
 > hardware. Development and all measurements were on an Apple M2.
 
-```
- line A ┐                                                           ┌─ IPC ────────► client (same host)
-        ├─► UDP recv ─► FeedSession ─► SPSC ring ─► BookManager ─► Aeron ─ UDP/mcast ► client (other host)
- line B ┘   (net thread)  seq, A/B arb,            (book thread)    server  └─ TCP gateway ► Python client
-                         gap recovery ◄─ re-request server (MoldUDP64 request packets)
-```
+![Architecture: from the wire to your strategy](docs/architecture.svg)
 
 | Stage | What it does | Details |
 |---|---|---|
